@@ -3,7 +3,8 @@ project(data-structures VERSION 0.1.0)
 
 enable_testing()
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
+add_compile_options(-std=c++2a -fconcepts)
 
 add_library(data-structures INTERFACE)
 add_compile_options(-g)
@@ -13,8 +14,6 @@ target_compile_features(data-structures INTERFACE cxx_std_17)
 add_executable(example main.cpp)
 target_include_directories(example INTERFACE include)
 target_link_libraries(example INTERFACE data-structures)
-add_compile_options(example -std=c++17)
-# target_compile_features(example INTERFACE cxx_std_17)
 
 add_custom_target(run
     COMMAND example

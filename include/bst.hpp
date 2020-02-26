@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <iostream>
 #include <cassert>
-#include <queue>
 
 template<typename ValueType>
 class BSTree {
@@ -20,21 +19,6 @@ class BSTree {
 
     PtrType m_root;
     size_t m_size;
-
-    void transplant(Node* old_node, PtrType& new_node) {
-        auto old_parent = old_node->parent;
-        if (old_node->parent == nullptr)
-            m_root = std::move(new_node);
-        else if (old_node == old_node->parent->left.get()) {
-            old_node->parent->left = std::move(new_node);
-            if (old_node->parent->left != nullptr)
-                old_node->parent->left->parent = old_parent;
-        } else {
-            old_node->parent->right = std::move(new_node);
-            if (old_node->parent->right != nullptr)
-                old_node->parent->right->parent = old_parent;
-        }
-    }
 
     Node* find(const ValueType& val) const {
         auto node = m_root.get();
@@ -58,6 +42,13 @@ class BSTree {
         while (node->left != nullptr)
             node = node->left.get();
         return node;
+    }
+
+    void map(PtrType& node, auto&& f) {
+        if (node == nullptr) return;
+        map(node->left, f);
+        node->val = f(node->val);
+        map(node->right, f);
     }
 
 public:
@@ -94,20 +85,16 @@ public:
         auto node = find(val);
         if (node == nullptr)
             return;
-        if (node->left == nullptr) {
-            transplant(node, node->right);
-        } else if (node->right == nullptr) {
-            transplant(node, node->left);
-        } else {
-            auto min_node = find_minimum(node->right);
-            if (min_node->parent != node) {
-                min_node->right = std::move(node->right);
-                min_node->right->parent = min_node;
-                transplant(min_node, min_node->right);
-            }
-            min_node->left = std::move(node->left);
-            min_node->left->parent = min_node;
-            transplant(node, owner(min_node));
+        if (node->left == nullptr)
+            owner(node).reset(node->right.release());
+        else if (node->right == nullptr)
+            owner(node).reset(node->left.release());
+        else {
+            auto succ = find_minimum(node->right);
+            auto min_val = succ->val;
+            // guaranteed to have only a right child
+            owner(succ).reset(succ->right.release());
+            node->val = min_val;
         }
     }
 
@@ -133,13 +120,13 @@ public:
         return node->val;
     }
 
-    std::optional<ValueType> sucessor(const ValueType& val) const {
+    std::optional<ValueType> successor(const ValueType& val) const {
         auto node = find(val);
         if (node->right != nullptr) {
-            auto min_node = find_minimum(node->right);
-            if (min_node == nullptr)
+            auto succ = find_minimum(node->right);
+            if (succ == nullptr)
                 return std::nullopt;
-            return std::make_optional(min_node->val);
+            return succ->val;
         }
         auto succ = node->parent;
         while (succ != nullptr and node == succ->right.get()) {
@@ -148,7 +135,11 @@ public:
         }
         if (succ == nullptr)
             return std::nullopt;
-        return std::make_optional(succ->val);
+        return succ->val;
+    }
+
+    void map(auto&& f) {
+        map(m_root, f);
     }
 
     friend std::ostream& operator<<(std::ostream& os, PtrType& node){
@@ -159,16 +150,6 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, BSTree& t) {
         return os << "[ " << t.m_root << " ]";
-    }
-
-    int depth() {
-        auto node = m_root.get();
-        int depth = 0;
-        while (node != nullptr) {
-            node = node->left != nullptr ? node->left.get() : node->right.get();
-            ++depth;
-        }
-        return depth;
     }
 };
 
