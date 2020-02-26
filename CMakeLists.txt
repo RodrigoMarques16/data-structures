@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(data-structures VERSION 0.1.0)
 
-enable_testing()
-
 set(CMAKE_CXX_STANDARD 20)
 add_compile_options(-std=c++2a -fconcepts)
+
+include_directories(lib)
+include_directories(include)
 
 add_library(data-structures INTERFACE)
 add_compile_options(-g)
@@ -15,8 +16,9 @@ add_executable(example main.cpp)
 target_include_directories(example INTERFACE include)
 target_link_libraries(example INTERFACE data-structures)
 
-add_custom_target(run
-    COMMAND example
-    DEPENDS example
-    WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}
-)
+add_library(catch INTERFACE)
+add_executable(tests tests/bst_tests.cpp)
+target_include_directories(tests INTERFACE lib)
+target_include_directories(tests INTERFACE include)
+target_link_libraries(tests INTERFACE catch)
+target_link_libraries(tests INTERFACE data-structures)
