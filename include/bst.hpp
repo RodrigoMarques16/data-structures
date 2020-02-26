@@ -7,7 +7,7 @@ template<typename ValueType>
 class BSTree {
     struct Node;
     using PtrType = std::unique_ptr<Node>;
-    
+
     struct Node {
         ValueType val;
         Node* parent = nullptr;
@@ -51,21 +51,20 @@ class BSTree {
         map(node->right, f);
     }
 
-public:
-
+  public:
     BSTree() = default;
 
     BSTree(std::initializer_list<ValueType> vals) : m_size(vals.size()) {
-        for(auto& val : vals)
+        for (auto& val : vals)
             insert(val);
     }
 
     size_t size() const { return m_size; }
-    
+
     void insert(const ValueType& val) {
         Node* parent = nullptr;
         auto node = m_root.get();
-        while(node != nullptr){
+        while (node != nullptr) {
             parent = node;
             if (val < node->val) node = node->left.get();
             else                 node = node->right.get();
@@ -85,16 +84,17 @@ public:
         auto node = find(val);
         if (node == nullptr)
             return;
-        if (node->left == nullptr)
-            owner(node).reset(node->right.release());
-        else if (node->right == nullptr)
-            owner(node).reset(node->left.release());
-        else {
+        if (node->left == nullptr) {
+            auto& o = owner(node);
+            o = std::move(node->right);
+        } else if (node->right == nullptr) {
+            auto& o = owner(node);
+            o = std::move(node->left);
+        } else {
             auto succ = find_minimum(node->right);
-            auto min_val = succ->val;
-            // guaranteed to have only a right child
+            node->val = succ->val;
+            // succ guaranteed not to be null and to have only a right child
             owner(succ).reset(succ->right.release());
-            node->val = min_val;
         }
     }
 
@@ -138,9 +138,7 @@ public:
         return succ->val;
     }
 
-    void map(auto&& f) {
-        map(m_root, f);
-    }
+    void map(auto &&f) { map(m_root, f); }
 
     friend std::ostream& operator<<(std::ostream& os, PtrType& node){
         if (node == nullptr)
