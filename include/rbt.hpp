@@ -17,11 +17,12 @@
 // nodes
 
 template<typename value_type>
-struct RBTree : private BSTree<value_type> {
+class RBTree : private BSTree<value_type> {
     struct Node;
 
     using raw_ptr    = Node*;
     using unique_ptr = std::unique_ptr<Node>;
+
 
     enum class rb_color { BLACK, RED };
     struct Node {
@@ -30,13 +31,58 @@ struct RBTree : private BSTree<value_type> {
         raw_ptr parent = nullptr;
         unique_ptr left = nullptr;
         unique_ptr right = nullptr;
-        explicit Node(const value_type& v) : val(v) {}
+        explicit Node(const value_type &v) : val(v) {}
     };
 
+    static const unique_ptr NIL;
     unique_ptr m_root;
     size_t m_size;
 
-    int black_height(raw_ptr node) {
+    unique_ptr &owner(raw_ptr node) {
+        auto parent = node->parent;
+        if (parent == nullptr)
+            return m_root;
+        if (parent->left.get() == node)
+            return parent->left;
+        else
+            return parent->right;
+    }
+
+    raw_ptr parent(const raw_ptr node) {
+        return node ? node->parent : nullptr;
+    }
+
+    raw_ptr grandparent(const raw_ptr node) {
+        return parent(parent(node));
+    }
+
+    raw_ptr sibling(const raw_ptr node) {
+        raw_ptr p = parent(node);
+        if (p == nullptr)
+            return nullptr;
+        if (node == p->left.get())
+            return p->right.get();
+        else
+            return p->left.get();
+    }
+
+    raw_ptr uncle(const raw_ptr node) {
+        return sibling(parent(node));
+    }
+
+    bool is_left_child(raw_ptr node) {
+        return node->parent 
+            && node->parent->left
+            && node == node->parent->left.get();
+    }
+
+    bool is_right_child(raw_ptr node) {
+        return node->parent 
+            && node->parent->right
+            && node == node->parent->right.get();
+    }
+
+    int black_height(const raw_ptr node) const {
         return (node->color == rb_color::BLACK) 
              + black_height(node->left)
              + black_height(node->right);
@@ -106,25 +152,44 @@ struct RBTree : private BSTree<value_type> {
             x->parent->right = std::move(x);
     }
 
-    raw_ptr tree_insert(const value_type& val) {
-        raw_ptr parent = nullptr;
-        raw_ptr node = m_root.get();
-        while (node != nullptr) {
-            parent = node;
-            if (val < node->val) node = node->left.get();
-            else                 node = node->right.get();
-        }
-        if (parent == nullptr) {
-            m_root = std::make_unique<Node>(val);
-            return m_root.get();
-        } else if (val < parent->val) {
-            parent->left = std::make_unique<Node>(val);
-            parent->left->parent = parent;
-            return parent->left.get();
-        } else {
-            parent->right = std::make_unique<Node>(val);
-            parent->right->parent = parent;
-            return parent->right.get();
+    bool is_same(const unique_ptr& a, const unique_ptr& b) const {
+        if (a == nullptr && b == nullptr)
+            return true;
+        else if (a == nullptr || b == nullptr)
+            return false;
+        else return a.get() == b.get() 
+                 && is_same(a->left, b->left) 
+                 && is_same(b->right, a->right);
+    }
+
+    void rebalance(raw_ptr node) {
+        raw_ptr p = parent(node);
+        raw_ptr y = uncle(node);
+
+        // if (!p) return;
+        // if (p->color == rb_color::BLACK)
+        //     return;
+
+        if (y && y->color == rb_color::RED) {
+            parent(node)->color = rb_color::BLACK;
+            uncle(node)->color = rb_color::BLACK;
+            grandparent(node)->color = rb_color::RED;
+            rebalance(grandparent(node));
+        } else if (p && p->color == rb_color::RED /* and y is black*/) {
+            if (is_right_child(node) && is_left_child(p)) {
+                left_rotate(owner(p));
+                node = node->left.get();
+            } else if (is_left_child(node) && is_right_child(p)) {
+                right_rotate(owner(p));
+                node = node->right.get();
+            }
+            raw_ptr g = grandparent(node);
+            if (node == p->left.get())
+                right_rotate(owner(g));
+            else
+                left_rotate(owner(g));
+            p->color = rb_color::BLACK;
+            g->color = rb_color::RED;
         }
     }
 
@@ -136,26 +201,40 @@ struct RBTree : private BSTree<value_type> {
             insert(val);
     }
 
+    bool operator==(const RBTree& other) const {
+        return is_same(m_root, other.m_root);
+    }
+
     size_t size() { return m_size; }
     bool empty() {return m_size == 0;}
     void clear() { m_root.release(); }
 
     void insert(const value_type& val) {
-        /*auto node =*/ tree_insert(val);
-        // while(node != m_root.get() && node->parent->color == rb_color::RED) {
-        //     if (node->parent == node->parent->parent->left.get()){
-        //         auto& uncle = node->parent->parent->right;
-        //         if (uncle->color == rb_color::RED){
-        //             // todo
-        //         } else if (node == node->parent->right.get()) {
-        //             // todo
-        //         }
-        //         // todo
-        //     } else {
+        raw_ptr parent = nullptr;
+        auto node = m_root.get();
 
-        //     }
-        // }
+        while (node != nullptr) {
+            parent = node;
+            if (val < node->val) node = node->left.get();
+            else                 node = node->right.get();
+        }
+
+        if (parent == nullptr){
+            m_root = std::make_unique<Node>(val);
+            m_root->color = rb_color::BLACK;
+        }
+        else if (val < parent->val) {
+            parent->left = std::make_unique<Node>(val);
+            parent->left->parent = parent;
+            rebalance(parent->left.get());
+        } else {
+            parent->right = std::make_unique<Node>(val);
+            parent->right->parent = parent;
+            rebalance(parent->right.get());
+        }
+
         m_root->color = rb_color::BLACK;
+        std::cout << m_root << '\n';
         ++m_size;
     }
 

@@ -21,6 +21,7 @@ add_executable(example main.cpp)
 target_include_directories(example INTERFACE include)
 target_link_libraries(example INTERFACE data-structures)
 
+
 add_executable(tests tests/tests_main.cpp tests/bst_tests.cpp tests/rbt_tests.cpp)
 target_link_libraries(tests INTERFACE catch)
 target_link_libraries(tests INTERFACE data-structures)

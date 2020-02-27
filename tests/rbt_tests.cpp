@@ -1,17 +1,18 @@
 #include <catch.hpp>
 #include <rbt.hpp>
 
-namespace {
-    TEST_CASE("RedBlack Trees", "[data-structure]") {
-        SECTION("construction") {
-        }
-        SECTION("left rotate") {
-            RBTree t = {12, 5, 18};
-            t.left_rotate(t.m_root);
-            CHECK(t.m_root->val == 18);
-            CHECK(t.m_root->left->val == 12);
-            CHECK(t.m_root->left->left->val == 5);
-            t.clear();
-        }
+TEST_CASE("RedBlack Trees", "[data-structure]") {
+
+    RBTree<int> TREE = {7, 4, 11, 3, 6, 9, 18, 2, 14, 19, 12, 17, 22, 20};
+
+    SECTION("construction") {}
+
+    SECTION("comparison") { 
+        CHECK(RBTree<int>{} == RBTree<int>{});
+        CHECK(TREE == TREE); 
+    }
+
+    SECTION("left rotate") {
+        RBTree t = {12, 5, 18};
     }
 }
