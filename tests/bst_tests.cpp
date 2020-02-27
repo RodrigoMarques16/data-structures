@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include <catch.hpp>
 #include <bst.hpp>
 
 TEST_CASE("Binary Search Trees", "[data-structure]") {
@@ -8,6 +8,6 @@ TEST_CASE("Binary Search Trees", "[data-structure]") {
         CHECK(t.size() == 3);
         CHECK(t.contains(2));
         CHECK(t.contains(4));
-        CHECK(t.contains(6));
+        CHECK(t.contains(6)); 
     }
 }

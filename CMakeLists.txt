@@ -6,11 +6,11 @@ add_compile_options(-std=c++2a -fconcepts -Wall -Wextra -Wpedantic -Wshadow -Wdu
 
 enable_testing()
 
-# add_subdirectory(lib/Catch2)
-find_package(Catch2 REQUIRED)
-
-# include_directories(lib)
+include_directories(lib)
 include_directories(include)
+
+add_library(catch INTERFACE)
+target_include_directories(catch INTERFACE lib)
 
 add_library(data-structures INTERFACE)
 add_compile_options(-g)
@@ -22,7 +22,7 @@ target_include_directories(example INTERFACE include)
 target_link_libraries(example INTERFACE data-structures)
 
 add_executable(tests tests/tests_main.cpp tests/bst_tests.cpp tests/rbt_tests.cpp)
-target_link_libraries(tests INTERFACE Catch2::Catch)
+target_link_libraries(tests INTERFACE catch)
 target_link_libraries(tests INTERFACE data-structures)
 
 include(CTest)
