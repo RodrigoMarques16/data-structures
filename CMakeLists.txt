@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.0)
 project(data-structures VERSION 0.1.0)
 
 set(CMAKE_CXX_STANDARD 20)
-add_compile_options(-std=c++2a -fconcepts)
+add_compile_options(-std=c++2a -fconcepts -Wall -Wextra -Wpedantic -Wshadow -Wduplicated-cond -Wnull-dereference -Wduplicated-branches -Wconversion -Wsign-conversion -O3)
 
 include_directories(lib)
 include_directories(include)
