@@ -16,11 +16,10 @@ class BSTree {
         pointer left = nullptr;
         pointer right = nullptr;
         explicit Node(const value_type& v) : val(v) {}
-        Node(Node&&) = default;
     };
 
-    pointer m_root;
-    size_t m_size;
+    pointer m_root = nullptr;
+    size_t m_size = 0;
 
     Node* find(const value_type& val) const {
         auto node = m_root.get();
