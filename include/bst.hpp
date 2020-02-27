@@ -8,20 +8,21 @@ template<typename value_type>
 class BSTree {
     struct Node;
 
-    using pointer = std::unique_ptr<Node>;
+    using raw_ptr    = Node*;
+    using unique_ptr = std::unique_ptr<Node>;
 
     struct Node {
         value_type val;
-        Node* parent = nullptr;
-        pointer left = nullptr;
-        pointer right = nullptr;
+        raw_ptr parent = nullptr;
+        unique_ptr left = nullptr;
+        unique_ptr right = nullptr;
         explicit Node(const value_type& v) : val(v) {}
     };
 
-    pointer m_root = nullptr;
+    unique_ptr m_root = nullptr;
     size_t m_size = 0;
 
-    Node* find(const value_type& val) const {
+    raw_ptr find(const value_type& val) const {
         auto node = m_root.get();
         while (node != nullptr && val != node->val)
             if (val < node->val) node = node->left.get();
@@ -29,7 +30,7 @@ class BSTree {
         return node;
     }
 
-    pointer& owner(Node* node) {
+    unique_ptr& owner(raw_ptr node) {
         auto parent = node->parent;
         if (parent == nullptr)
             return m_root;
@@ -38,28 +39,28 @@ class BSTree {
         else return parent->right;
     }
 
-    Node* find_minimum(const pointer& ref) {
+    raw_ptr find_minimum(const unique_ptr& ref) {
         auto node = ref.get();
         while (node->left != nullptr)
             node = node->left.get();
         return node;
     }
 
-    Node* find_maximum(const pointer& ref) {
+    raw_ptr find_maximum(const unique_ptr& ref) {
         auto node = ref.get();
         while (node->right != nullptr)
             node = node->right.get();
         return node;
     }
 
-    Node const* find_minimum(const pointer& ref) const {
+    Node const* find_minimum(const unique_ptr& ref) const {
         auto node = ref.get();
         while (node->left != nullptr)
             node = node->left.get();
         return node;
     }
 
-    void transform(pointer& node, auto&& f) {
+    void transform(unique_ptr& node, auto&& f) {
         if (node == nullptr) return;
         transform(node->left, f);
         node->val = f(node->val);
@@ -79,7 +80,7 @@ class BSTree {
     void clear() { m_root.release(); }
 
     void insert(const value_type& val) {
-        Node* parent = nullptr;
+        raw_ptr parent = nullptr;
         auto node = m_root.get();
         while (node != nullptr) {
             parent = node;
@@ -99,7 +100,7 @@ class BSTree {
     }
 
     void remove(const value_type& val) {
-        auto node = find(val);
+        unique_ptr node = find(val);
         if (node == nullptr)
             return;
         if (node->left == nullptr) {
@@ -159,7 +160,7 @@ class BSTree {
 
     void transform(auto&& f) { transform(m_root, f); }
 
-    friend std::ostream& operator<<(std::ostream& os, pointer& node){
+    friend std::ostream& operator<<(std::ostream& os, unique_ptr& node){
         if (node == nullptr)
             return os << "empty";
         return os << node->val << " " << node->left << " " << node->right;

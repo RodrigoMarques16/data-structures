@@ -1,12 +1,10 @@
-#define CATCH_CONFIG_MAIN
-
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 #include <bst.hpp>
 
-TEST_CASE("Vectors", "[math]") {
-    SECTION("default construction") {
+TEST_CASE("Binary Search Trees", "[data-structure]") {
+    SECTION("transform") {
         BSTree<int> t = {1,2,3};
-        t.map([](int x){return x * 2;});
+        t.transform([](int x){return x * 2;});
         CHECK(t.size() == 3);
         CHECK(t.contains(2));
         CHECK(t.contains(4));

@@ -4,7 +4,12 @@ project(data-structures VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 20)
 add_compile_options(-std=c++2a -fconcepts -Wall -Wextra -Wpedantic -Wshadow -Wduplicated-cond -Wnull-dereference -Wduplicated-branches -Wconversion -Wsign-conversion -g)
 
-include_directories(lib)
+enable_testing()
+
+# add_subdirectory(lib/Catch2)
+find_package(Catch2 REQUIRED)
+
+# include_directories(lib)
 include_directories(include)
 
 add_library(data-structures INTERFACE)
@@ -16,9 +21,9 @@ add_executable(example main.cpp)
 target_include_directories(example INTERFACE include)
 target_link_libraries(example INTERFACE data-structures)
 
-add_library(catch INTERFACE)
-add_executable(tests tests/bst_tests.cpp)
-target_include_directories(tests INTERFACE lib)
-target_include_directories(tests INTERFACE include)
-target_link_libraries(tests INTERFACE catch)
+add_executable(tests tests/tests_main.cpp tests/bst_tests.cpp tests/rbt_tests.cpp)
+target_link_libraries(tests INTERFACE Catch2::Catch)
 target_link_libraries(tests INTERFACE data-structures)
+
+include(CTest)
+add_test(mytests tests)
