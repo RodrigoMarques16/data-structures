@@ -1,6 +1,7 @@
 build
 notes
 .vscode
+lib/Catch2
 
 # Prerequisites
 *.d
@@ -34,3 +35,4 @@ notes
 *.exe
 *.out
 *.app
+lib/Catch2
