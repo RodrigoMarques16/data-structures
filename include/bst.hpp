@@ -69,7 +69,7 @@ class BSTree {
   public:
     BSTree() = default;
 
-    BSTree(std::initializer_list<value_type> vals) : m_size(vals.size()) {
+    BSTree(std::initializer_list<value_type> vals) {
         for (auto& val : vals)
             insert(val);
     }
@@ -95,6 +95,7 @@ class BSTree {
             parent->right = std::make_unique<Node>(val);
             parent->right->parent = parent;
         }
+        ++m_size;
     }
 
     void remove(const value_type& val) {
@@ -113,6 +114,7 @@ class BSTree {
             // succ guaranteed not to be null and to have only a right child
             owner(succ).reset(succ->right.release());
         }
+        --m_size;
     }
 
     bool contains(const value_type& val) const {
