@@ -1,8 +1,8 @@
-#include <memory>
-#include <iostream>
-#include <optional>
 #include "bst.hpp"
-#include <cassert>
+#include <iomanip>
+#include <iostream>
+#include <memory>
+#include <optional>
 
 // 1. a node is red or black 
 //
@@ -234,7 +234,6 @@ class RBTree : private BSTree<value_type> {
         }
 
         m_root->color = rb_color::BLACK;
-        std::cout << m_root << '\n';
         ++m_size;
     }
 
@@ -254,4 +253,24 @@ class RBTree : private BSTree<value_type> {
         return os << "[ " << t.m_root << " ]";
     }
 
+    void print() {
+        print_rec(m_root.get(), "", false);
+    }
+
+    // https://stackoverflow.com/questions/36802354/print-binary-tree-in-a-pretty-way-using-c
+    void print_rec(raw_ptr node, const std::string& prefix, bool is_left) {
+        if (node == nullptr) return;
+
+        std::cout << prefix << (is_left ? "├──" : "└──");
+        if (node->color == rb_color::RED)
+            std::cout << std::setw(2) << "\033[31m" << node->val << "\033[0m\n";
+        else
+            std::cout << std::setw(2) << node->val << '\n';
+        print_rec(node->left.get(),
+                  prefix + (is_left ? "│   " : "    "), 
+                  true);
+        print_rec(node->right.get(), 
+                 prefix + (is_left ? "│   " : "    "), 
+                 false);
+    }
 };
