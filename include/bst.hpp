@@ -23,7 +23,7 @@ class BSTree {
     size_t m_size = 0;
 
     raw_ptr find(const value_type& val) const {
-        auto node = m_root.get();
+        raw_ptr node = m_root.get();
         while (node != nullptr && val != node->val)
             if (val < node->val) node = node->left.get();
             else                 node = node->right.get();
@@ -31,7 +31,7 @@ class BSTree {
     }
 
     unique_ptr& owner(raw_ptr node) {
-        auto parent = node->parent;
+        raw_ptr parent = node->parent;
         if (parent == nullptr)
             return m_root;
         if (parent->left.get() == node)
@@ -40,23 +40,16 @@ class BSTree {
     }
 
     raw_ptr find_minimum(const unique_ptr& ref) {
-        auto node = ref.get();
+        raw_ptr node = ref.get();
         while (node->left != nullptr)
             node = node->left.get();
         return node;
     }
 
     raw_ptr find_maximum(const unique_ptr& ref) {
-        auto node = ref.get();
+        raw_ptr node = ref.get();
         while (node->right != nullptr)
             node = node->right.get();
-        return node;
-    }
-
-    Node const* find_minimum(const unique_ptr& ref) const {
-        auto node = ref.get();
-        while (node->left != nullptr)
-            node = node->left.get();
         return node;
     }
 
@@ -81,7 +74,7 @@ class BSTree {
 
     void insert(const value_type& val) {
         raw_ptr parent = nullptr;
-        auto node = m_root.get();
+        raw_ptr node = m_root.get();
         while (node != nullptr) {
             parent = node;
             if (val < node->val) node = node->left.get();
@@ -100,7 +93,7 @@ class BSTree {
     }
 
     void remove(const value_type& val) {
-        unique_ptr node = find(val);
+        raw_ptr node = find(val);
         if (node == nullptr)
             return;
         if (node->left == nullptr) {
@@ -110,7 +103,7 @@ class BSTree {
             auto& o = owner(node);
             o = std::move(node->left);
         } else {
-            auto succ = find_minimum(node->right);
+            raw_ptr succ = find_minimum(node->right);
             node->val = succ->val;
             // succ guaranteed not to be null and to have only a right child
             owner(succ).reset(succ->right.release());
@@ -119,7 +112,7 @@ class BSTree {
     }
 
     bool contains(const value_type& val) const {
-        auto node = m_root.get();
+        raw_ptr node = m_root.get();
         while (node != nullptr && val != node->val)
             if (val < node->val) node = node->left.get();
             else                 node = node->right.get();
@@ -127,28 +120,28 @@ class BSTree {
     }
 
     value_type minimum() const {
-        auto node = m_root.get();
+        raw_ptr node = m_root.get();
         while (node->left != nullptr)
             node = node->left.get();
         return node->val;
     }
 
     value_type maximum() const {
-        auto node = m_root.get();
+        raw_ptr node = m_root.get();
         while (node->right != nullptr)
             node = node->right.get();
         return node->val;
     }
 
     std::optional<value_type> successor(const value_type& val) const {
-        auto node = find(val);
+        raw_ptr node = find(val);
         if (node->right != nullptr) {
-            auto succ = find_minimum(node->right);
+            raw_ptr succ = find_minimum(node->right);
             if (succ == nullptr)
                 return std::nullopt;
             return succ->val;
         }
-        auto succ = node->parent;
+        raw_ptr succ = node->parent;
         while (succ != nullptr and node == succ->right.get()) {
             node = succ;
             succ = succ->parent;
