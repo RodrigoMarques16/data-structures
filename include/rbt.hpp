@@ -88,12 +88,12 @@ class RBTree : private BSTree<value_type> {
              + black_height(node->right);
     }
 
-    void left_rotate(unique_ptr& x) {
+    void left_rotate(unique_ptr &x) {
         //    P       Initial state  ->  Final state          P
         //    X       P owns X           P owns Y             Y
         //  A   Y     X owns A and Y     Y owns X and C     X   C
         //    B   C   Y owns B and C     X owns A and B   A   B
-
+        bool is_left = is_left_child(x.get());
         // steal Y from x
         unique_ptr y = std::move(x->right);
         // we own Y
@@ -124,7 +124,7 @@ class RBTree : private BSTree<value_type> {
         // give Y to P
         if (y->parent == nullptr)
             m_root = std::move(y);
-        else if (y->left.get() == y->parent->left.get())
+        else if (is_left)
             y->parent->left = std::move(y);
         else
             y->parent->right = std::move(y);
@@ -132,7 +132,9 @@ class RBTree : private BSTree<value_type> {
         // P owns Y (done)
     }
 
-    void right_rotate(unique_ptr& y) {
+    void right_rotate(unique_ptr &y) {
+        bool is_left = is_left_child(y.get())
+
         unique_ptr x = std::move(y->left);
 
         y->left = std::move(x->right);
@@ -146,7 +148,7 @@ class RBTree : private BSTree<value_type> {
 
         if (x->parent == nullptr)
             m_root = std::move(x);
-        else if (x->right.get() == x->parent->left.get())
+        else if (is_left)
             x->parent->left = std::move(x);
         else
             x->parent->right = std::move(x);
