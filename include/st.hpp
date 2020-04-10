@@ -22,6 +22,15 @@ template <typename value_type> class STree : private BSTree<value_type> {
     unique_ptr m_root;
     size_t m_size;
 
+    raw_ptr find(const value_type& val) const {
+        auto node = m_root.get();
+        while (node != nullptr && val != node->val)
+            if (val < node->val) node = node->left.get();
+            else                 node = node->right.get();
+        rebalance(node);
+        return node;
+    }
+
     unique_ptr &owner(raw_ptr node) {
         auto parent = node->parent;
         if (parent == nullptr)
@@ -103,7 +112,7 @@ template <typename value_type> class STree : private BSTree<value_type> {
     }
 
     void right_rotate(unique_ptr &y) {
-        bool is_left = is_left_child(y.get())
+        bool is_left = is_left_child(y.get());
 
         unique_ptr x = std::move(y->left);
 
@@ -160,8 +169,46 @@ template <typename value_type> class STree : private BSTree<value_type> {
 
     void rebalance(raw_ptr node) {
         raw_ptr p = parent(node);
+        raw_ptr gp = grandparent(node);
 
-        while (p != nullptr) {
+        while (gp != nullptr) {
+            print();
+            if (is_left_child(node) == is_left_child(p)) {
+                if (is_left_child(p)) {
+                    right_rotate(owner(gp));
+                    std::cout << "right rotate - ";
+                } else {
+                    left_rotate(owner(gp));
+                    std::cout << "left rotate - ";
+                }
+                if (is_left_child(node)) {
+                    right_rotate(owner(p));
+                    std::cout << "right rotate" << std::endl;
+                } else {
+                    left_rotate(owner(p));
+                    std::cout << "left rotate" << std::endl;
+                }
+            } else {
+                if (is_left_child(node)) {
+                    right_rotate(owner(p));
+                    std::cout << "right rotate - ";
+                } else {
+                    left_rotate(owner(p));
+                    std::cout << "left rotate - ";
+                }
+                if (is_left_child(node)) {
+                    right_rotate(owner(gp));
+                    std::cout << "right rotate" << std::endl;
+                } else {
+                    left_rotate(owner(gp));
+                    std::cout << "left rotate" << std::endl;
+                }
+            }
+            p = parent(node);
+            gp = grandparent(node);
+        }
+
+        if (p != nullptr) {
             print();
             if (is_left_child(node)) {
                 right_rotate(owner(p));
@@ -170,7 +217,6 @@ template <typename value_type> class STree : private BSTree<value_type> {
                 left_rotate(owner(p));
                 std::cout << "left rotate" << std::endl;
             }
-            p = parent(node);
         }
     }
 
@@ -218,44 +264,6 @@ template <typename value_type> class STree : private BSTree<value_type> {
         print();
     }
 
-    bool contains(const value_type &val) const {
-        auto node = m_root.get();
-        raw_ptr parent = nullptr;
-        while (node != nullptr && val != node->val){
-            parent = node;
-            if (val < node->val)
-                node = node->left.get();
-            else
-                node = node->right.get();
-        }
-        if (node != nullptr) {
-            rebalance(node);
-            return true;
-        }
-        rebalance(parent);
-        return false;
-    }
-
-    void remove(const value_type &val) {
-        unique_ptr node = find(val);
-        if (node == nullptr)
-            return;
-        rebalance(node);
-        if (node->left == nullptr) {
-            auto &o = owner(node);
-            o = std::move(node->right);
-        } else if (node->right == nullptr) {
-            auto &o = owner(node);
-            o = std::move(node->left);
-        } else {
-            auto succ = find_minimum(node->right);
-            node->val = succ->val;
-            // succ guaranteed not to be null and to have only a right child
-            owner(succ).reset(succ->right.release());
-        }
-        --m_size;
-    }
-
     friend std::ostream &operator<<(std::ostream &os, unique_ptr &node) {
         if (node == nullptr)
             return os << "empty";
@@ -273,7 +281,9 @@ template <typename value_type> class STree : private BSTree<value_type> {
         if (node == nullptr)
             return;
 
-        std::cout << prefix << (is_left && node->parent && node->parent->right ? "├──" : "└──");
+        std::cout << prefix
+                  << (is_left && node->parent && node->parent->right ? "├──"
+                                                                     : "└──");
         std::cout << std::setw(2) << node->val << (is_left ? "L" : "R") << '\n';
         print_rec(node->left.get(), prefix + (is_left ? "│   " : "    "), true);
         print_rec(node->right.get(), prefix + (is_left ? "│   " : "    "),

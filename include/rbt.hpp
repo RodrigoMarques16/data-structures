@@ -133,7 +133,7 @@ class RBTree : private BSTree<value_type> {
     }
 
     void right_rotate(unique_ptr &y) {
-        bool is_left = is_left_child(y.get())
+        bool is_left = is_left_child(y.get());
 
         unique_ptr x = std::move(y->left);
 
