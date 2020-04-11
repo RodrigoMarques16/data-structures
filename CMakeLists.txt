@@ -13,14 +13,12 @@ add_library(catch INTERFACE)
 target_include_directories(catch INTERFACE lib)
 
 add_library(data-structures INTERFACE)
-add_compile_options(-g)
 target_include_directories(data-structures INTERFACE include)
 target_compile_features(data-structures INTERFACE cxx_std_17)
 
 add_executable(example main.cpp)
 target_include_directories(example INTERFACE include)
 target_link_libraries(example INTERFACE data-structures)
-
 
 add_executable(tests tests/tests_main.cpp tests/bst_tests.cpp tests/rbt_tests.cpp)
 target_link_libraries(tests INTERFACE catch)

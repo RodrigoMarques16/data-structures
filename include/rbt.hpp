@@ -1,4 +1,5 @@
-#include "bst.hpp"
+#pragma once
+
 #include <iomanip>
 #include <iostream>
 #include <memory>
@@ -22,7 +23,6 @@ class RBTree : private BSTree<value_type> {
 
     using raw_ptr    = Node*;
     using unique_ptr = std::unique_ptr<Node>;
-
 
     enum class rb_color { BLACK, RED };
     struct Node {
@@ -162,19 +162,17 @@ class RBTree : private BSTree<value_type> {
                  && is_same(b->right, a->right);
     }
 
-    void rebalance(raw_ptr node) {
+    void insert_fixup(raw_ptr node) {
         raw_ptr p = parent(node);
-        raw_ptr y = uncle(node);
-
-        // if (!p) return;
-        // if (p->color == rb_color::BLACK)
+        // if (!p || (p->color == rb_color::BLACK)
         //     return;
+        raw_ptr y = uncle(node);
 
         if (y && y->color == rb_color::RED) {
             parent(node)->color = rb_color::BLACK;
             uncle(node)->color = rb_color::BLACK;
             grandparent(node)->color = rb_color::RED;
-            rebalance(grandparent(node));
+            insert_fixup(grandparent(node));
         } else if (p && p->color == rb_color::RED /* and y is black*/) {
             if (is_right_child(node) && is_left_child(p)) {
                 left_rotate(owner(p));
@@ -191,6 +189,18 @@ class RBTree : private BSTree<value_type> {
             p->color = rb_color::BLACK;
             g->color = rb_color::RED;
         }
+    }
+
+    raw_ptr find(const value_type& val) const {
+        auto node = m_root.get();
+        while (node != nullptr && val != node->val)
+            if (val < node->val) node = node->left.get();
+            else                 node = node->right.get();
+        return node;
+    }
+
+    void remove_fixup(unique_ptr& node) {
+        
     }
 
   public:
@@ -226,15 +236,40 @@ class RBTree : private BSTree<value_type> {
         else if (val < parent->val) {
             parent->left = std::make_unique<Node>(val);
             parent->left->parent = parent;
-            rebalance(parent->left.get());
+            insert_fixup(parent->left.get());
         } else {
             parent->right = std::make_unique<Node>(val);
             parent->right->parent = parent;
-            rebalance(parent->right.get());
+            insert_fixup(parent->right.get());
         }
 
         m_root->color = rb_color::BLACK;
         ++m_size;
+    }
+
+    void remove(const value_type &val) {
+        raw_ptr node = find(val);
+        unique_ptr& to_fix;
+        if (node == nullptr)
+            return;
+        auto original_color = node->color;
+        if (node->left == nullptr) {
+            to_fix = owner(node);
+            to_fix = std::move(node->right);
+        } else if (node->right == nullptr) {
+            to_fix = owner(node);
+            to_fix = std::move(node->left);
+        } else {
+            raw_ptr succ = find_minimum(node->right);
+            node->val = succ->val;
+            to_fix = owner(succ);
+            to_fix.reset(succ->right.release());
+        }
+
+        if (original_color == rb_color::BLACK)
+            remove_fixup(to_fix);
+
+        --m_size;
     }
 
     friend std::ostream& operator<<(std::ostream& os, unique_ptr& node){
