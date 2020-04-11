@@ -18,7 +18,7 @@
 // nodes
 
 template<typename value_type>
-class RBTree : private BSTree<value_type> {
+class RBTree {
     struct Node;
 
     using raw_ptr    = Node*;
@@ -31,14 +31,14 @@ class RBTree : private BSTree<value_type> {
         raw_ptr parent = nullptr;
         unique_ptr left = nullptr;
         unique_ptr right = nullptr;
-        explicit Node(const value_type &v) : val(v) {}
+        explicit Node(const value_type& v) : val(v) {}
     };
 
     static const unique_ptr NIL;
     unique_ptr m_root;
     size_t m_size;
 
-    unique_ptr &owner(raw_ptr node) {
+    unique_ptr& owner(raw_ptr node) {
         auto parent = node->parent;
         if (parent == nullptr)
             return m_root;
@@ -88,7 +88,7 @@ class RBTree : private BSTree<value_type> {
              + black_height(node->right);
     }
 
-    void left_rotate(unique_ptr &x) {
+    void left_rotate(unique_ptr& x) {
         //    P       Initial state  ->  Final state          P
         //    X       P owns X           P owns Y             Y
         //  A   Y     X owns A and Y     Y owns X and C     X   C
@@ -132,7 +132,7 @@ class RBTree : private BSTree<value_type> {
         // P owns Y (done)
     }
 
-    void right_rotate(unique_ptr &y) {
+    void right_rotate(unique_ptr& y) {
         bool is_left = is_left_child(y.get());
 
         unique_ptr x = std::move(y->left);
@@ -249,7 +249,7 @@ class RBTree : private BSTree<value_type> {
         ++m_size;
     }
 
-    void remove(const value_type &val) {
+    void remove(const value_type& val) {
         raw_ptr node = find(val);
         unique_ptr& to_fix;
         if (node == nullptr)
@@ -274,7 +274,7 @@ class RBTree : private BSTree<value_type> {
         --m_size;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, unique_ptr& node){
+    friend std::ostream& operator<<(std::ostream& os, unique_ptr& node) {
         if (node == nullptr)
             return os << "empty";
         switch (node->color) {
