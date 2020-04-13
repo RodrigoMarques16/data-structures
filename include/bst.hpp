@@ -53,7 +53,8 @@ class BSTree {
         return node;
     }
 
-    void transform(unique_ptr& node, auto&& f) {
+    template<typename Func>
+    void transform(unique_ptr& node, Func f) {
         if (node == nullptr) return;
         transform(node->left, f);
         node->val = f(node->val);
@@ -151,7 +152,8 @@ class BSTree {
         return succ->val;
     }
 
-    void transform(auto&& f) { transform(m_root, f); }
+    template<typename Func>
+    void transform(Func f) { transform(m_root, f); }
 
     friend std::ostream& operator<<(std::ostream& os, unique_ptr& node){
         if (node == nullptr)
