@@ -22,12 +22,17 @@ template <typename value_type> class STree : private BSTree<value_type> {
     unique_ptr m_root;
     size_t m_size;
 
-    raw_ptr find(const value_type& val) const {
+    raw_ptr find(const value_type &val) {
         auto node = m_root.get();
-        while (node != nullptr && val != node->val)
-            if (val < node->val) node = node->left.get();
-            else                 node = node->right.get();
-        rebalance(node);
+        raw_ptr parent;
+        while (node != nullptr && val != node->val){
+            parent = node;
+            if (val < node->val)
+                node = node->left.get();
+            else
+                node = node->right.get();
+        }
+        rebalance(node ? node : parent);
         return node;
     }
 
@@ -264,6 +269,30 @@ template <typename value_type> class STree : private BSTree<value_type> {
         print();
     }
 
+    void remove(const value_type& val) {
+        raw_ptr node = find(val);
+        if (node == nullptr)
+            return;
+        if (node->left == nullptr) {
+            auto& o = owner(node);
+            o = std::move(node->right);
+        } else if (node->right == nullptr) {
+            auto& o = owner(node);
+            o = std::move(node->left);
+        } else {
+            raw_ptr succ = find_maximum(node->left);
+            node->val = succ->val;
+            // succ guaranteed not to be null and to have only a right child
+            owner(succ).reset(succ->right.release());
+        }
+        --m_size;
+    }
+
+    bool contains(const value_type& val) {
+        raw_ptr node = find(val);
+        return node != nullptr;
+    }
+
     friend std::ostream &operator<<(std::ostream &os, unique_ptr &node) {
         if (node == nullptr)
             return os << "empty";
@@ -282,9 +311,11 @@ template <typename value_type> class STree : private BSTree<value_type> {
             return;
 
         std::cout << prefix
-                  << (is_left && node->parent && node->parent->right ? "├──"
-                                                                     : "└──");
-        std::cout << std::setw(2) << node->val << (is_left ? "L" : "R") << '\n';
+                  << (is_left ? node->parent->right != nullptr ? "├──" : "└──"
+                              : "└──");
+
+        std::cout << std::setw(2) << node->val << '\n';
+
         print_rec(node->left.get(), prefix + (is_left ? "│   " : "    "), true);
         print_rec(node->right.get(), prefix + (is_left ? "│   " : "    "),
                   false);
