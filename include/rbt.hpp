@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <optional>
+#include "common.hpp"
 
 // 1. a node is red or black 
 //
@@ -34,9 +35,8 @@ class RBTree {
         explicit Node(const value_type& v) : val(v) {}
     };
 
-    static const unique_ptr NIL;
     unique_ptr m_root;
-    size_t m_size;
+    size_t m_size = 0;
 
     unique_ptr& owner(raw_ptr node) {
         auto parent = node->parent;
@@ -46,40 +46,6 @@ class RBTree {
             return parent->left;
         else
             return parent->right;
-    }
-
-    raw_ptr parent(const raw_ptr node) {
-        return node ? node->parent : nullptr;
-    }
-
-    raw_ptr grandparent(const raw_ptr node) {
-        return parent(parent(node));
-    }
-
-    raw_ptr sibling(const raw_ptr node) {
-        raw_ptr p = parent(node);
-        if (p == nullptr)
-            return nullptr;
-        if (node == p->left.get())
-            return p->right.get();
-        else
-            return p->left.get();
-    }
-
-    raw_ptr uncle(const raw_ptr node) {
-        return sibling(parent(node));
-    }
-
-    bool is_left_child(raw_ptr node) {
-        return node->parent 
-            && node->parent->left
-            && node == node->parent->left.get();
-    }
-
-    bool is_right_child(raw_ptr node) {
-        return node->parent 
-            && node->parent->right
-            && node == node->parent->right.get();
     }
 
     int black_height(const raw_ptr node) const {
@@ -154,14 +120,14 @@ class RBTree {
             x->parent->right = std::move(x);
     }
 
-    bool is_same(const unique_ptr& a, const unique_ptr& b) const {
+    bool is_equal(const unique_ptr& a, const unique_ptr& b) const {
         if (a == nullptr && b == nullptr)
             return true;
         else if (a == nullptr || b == nullptr)
             return false;
-        else return a.get() == b.get() 
-                 && is_same(a->left, b->left) 
-                 && is_same(b->right, a->right);
+        else return a->val == b->val
+                 && is_equal(a->left, b->left) 
+                 && is_equal(b->right, a->right);
     }
 
     void insert_fixup(raw_ptr node) {
@@ -201,25 +167,31 @@ class RBTree {
         return node;
     }
 
-    void remove_fixup(unique_ptr& node) {
-        
-    }
-
   public:
     RBTree() = default;
 
     RBTree(std::initializer_list<value_type> vals) {
         for (auto& val : vals)
             insert(val);
+        // m_size = vals.size();
     }
 
     bool operator==(const RBTree& other) const {
-        return is_same(m_root, other.m_root);
+        return is_equal(m_root, other.m_root);
+    }
+
+    bool operator!=(const RBTree& other) const {
+        return !(m_root == other.m_root);
     }
 
     size_t size() { return m_size; }
-    bool empty() {return m_size == 0;}
-    void clear() { m_root.release(); }
+
+    bool empty() { return m_size == 0; }
+
+    void clear() {
+        m_root.release();
+        m_size = 0;
+    }
 
     void insert(const value_type& val) {
         raw_ptr parent = nullptr;
@@ -247,31 +219,6 @@ class RBTree {
 
         m_root->color = rb_color::BLACK;
         ++m_size;
-    }
-
-    void remove(const value_type& val) {
-        raw_ptr node = find(val);
-        unique_ptr& to_fix;
-        if (node == nullptr)
-            return;
-        auto original_color = node->color;
-        if (node->left == nullptr) {
-            to_fix = owner(node);
-            to_fix = std::move(node->right);
-        } else if (node->right == nullptr) {
-            to_fix = owner(node);
-            to_fix = std::move(node->left);
-        } else {
-            raw_ptr succ = find_minimum(node->right);
-            node->val = succ->val;
-            to_fix = owner(succ);
-            to_fix.reset(succ->right.release());
-        }
-
-        if (original_color == rb_color::BLACK)
-            remove_fixup(to_fix);
-
-        --m_size;
     }
 
     friend std::ostream& operator<<(std::ostream& os, unique_ptr& node) {
