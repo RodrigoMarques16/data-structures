@@ -3,16 +3,37 @@
 
 TEST_CASE("RedBlack Trees", "[data-structure]") {
 
-    RBTree<int> TREE = {7, 4, 11, 3, 6, 9, 18, 2, 14, 19, 12, 17, 22, 20};
+    using Tree = RBTree<int>;
 
-    SECTION("construction") {}
+    SECTION("construction") {
+        Tree e{};
+        CHECK(e.empty() == true);
+        CHECK(e.size() == 0);
 
-    SECTION("comparison") { 
-        CHECK(RBTree<int>{} == RBTree<int>{});
-        CHECK(TREE == TREE); 
+        Tree t = {1, 2, 3};
+        CHECK(t.empty() == false);
+        CHECK(t.size() == 3);
+
+        Tree t2;
+        t2.insert(1);
+        t2.insert(2);
+        t2.insert(3);
+        CHECK(t2.empty() == false);
+        CHECK(t2.size() == 3);
+        CHECK(t2 == t);
     }
 
-    SECTION("left rotate") {
-        RBTree t = {12, 5, 18};
+    SECTION("clear") {
+        Tree t = {1, 2, 3};
+        t.clear();
+        CHECK(t == Tree{});
+        CHECK(t.empty() == true);
+    }
+
+    SECTION("comparison") {
+        CHECK(Tree{} == Tree{});
+        CHECK(Tree{1, 2, 3} == Tree{1, 2, 3});
+        CHECK(Tree{1, 2, 3} != Tree{});
+        CHECK(Tree{1, 2, 3} != Tree{3, 2, 1});
     }
 }
