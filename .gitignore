@@ -1,7 +1,7 @@
-build
-notes
 .vscode
-lib/Catch2
+
+build
+!build/Makefile
 
 # Prerequisites
 *.d

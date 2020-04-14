@@ -1,2 +1,26 @@
-# data-structures
-advanced topics in algorithms - spring 2020 @fcup
+# Data Structures
+
+## Compiling
+
+From the project root:
+
+`> cmake --build build --config Release --target all`
+
+or
+
+`> cd build`
+`> make`
+
+## Running
+
+Run `./build/[target}`
+
+Available targets are: benchmarks, targets
+
+## References
+
+The original xxHash: https://github.com/Cyan4973/xxHash
+
+The port we're using: https://github.com/RedSpah/xxhash_cpp
+
+FNV hash from: https://create.stephan-brumme.com/fnv-hash/
