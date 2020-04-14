@@ -42,6 +42,26 @@ add_test(mytests tests)
 #######################################
 ## BENCHMARKS #########################
 #######################################
-add_executable(benchmarks benchmarks/rbt_bench.cpp)
+add_executable(benchmarks 
+               benchmarks/common.hpp 
+               benchmarks/st_bench.cpp benchmarks/rb_bench.cpp bencharmks/st_bench.cpp)
 target_include_directories(benchmarks INTERFACE include)
-target_link_libraries(tests INTERFACE data-structures)
+target_link_libraries(benchmarks INTERFACE data-structures)
+
+add_executable(st_bench 
+               benchmarks/common.hpp 
+               benchmarks/st_bench.cpp)
+target_include_directories(st_bench INTERFACE include)
+target_link_libraries(st_bench INTERFACE data-structures)
+
+add_executable(rb_bench 
+               benchmarks/common.hpp 
+               benchmarks/rb_bench.cpp)
+target_include_directories(rb_bench INTERFACE include)
+target_link_libraries(rb_bench INTERFACE data-structures)
+
+add_executable(bf_bench 
+               benchmarks/common.hpp 
+               benchmarks/bf_bench.cpp)
+target_include_directories(bf_bench INTERFACE include)
+target_link_libraries(bf_bench INTERFACE data-structures)

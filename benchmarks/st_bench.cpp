@@ -1,19 +1,15 @@
 #include <iostream>
 #include <algorithm>
-#include <fstream>
-#include <chrono>
 
 #include "common.hpp"
 #include "st.hpp"
-
-using namespace std::chrono;
 
 #define word_count  1000000
 
 int main() {
     auto st = STree<std::string>();
-    auto words = read_words(word_count,"./benchmarks/words");
-
+    auto words = read_words(word_count);
+    std::cout << words.size() << '\n';
     std::cout << "Splay Tree"
               << " @ " << word_count << " words\n";
 
