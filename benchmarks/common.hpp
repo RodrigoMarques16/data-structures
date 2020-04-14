@@ -5,7 +5,7 @@
 #include <vector>
 #include <chrono>
 #include <iostream>
-#include <cassert>
+#include <functional>
 
 std::vector<std::string> read_words(int count = 1000000, const char* path = "words") {
     std::ifstream fs(path);
@@ -19,7 +19,6 @@ std::vector<std::string> read_words(int count = 1000000, const char* path = "wor
 
     return words;
 }
-
 
 void benchmark(std::string_view out, std::function<void()> f) {
     using namespace std::chrono;

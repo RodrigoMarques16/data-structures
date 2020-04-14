@@ -1,3 +1,5 @@
+#pragma once
+
 #include "bst.hpp"
 #include "common.hpp"
 #include <iomanip>

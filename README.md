@@ -15,7 +15,7 @@ or
 
 Run `./build/[target}`
 
-Available targets are: benchmarks, targets
+Available targets are: rb_bench, st_bench, bf_bench
 
 ## References
 

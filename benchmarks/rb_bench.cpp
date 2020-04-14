@@ -1,20 +1,19 @@
 #include <iostream>
 
 #include "common.hpp"
-#include "st.hpp"
+#include "rbt.hpp"
 
 #define word_count  1000000
 
 int main() {
-    auto st = STree<std::string>();
+    auto rb = RBTree<std::string>();
     auto words = read_words(word_count);
-    std::cout << words.size() << '\n';
-    std::cout << "Splay Tree"
+    std::cout << "Red-Black Tree"
               << " @ " << word_count << " words\n";
 
     benchmark("Insertion ", [&](){
         for(int i = 0; i< word_count; i++)
-            st.insert(words[i]);
+            rb.insert(words[i]);
     });    
     
     return 0;

@@ -1,12 +1,7 @@
 #include <iostream>
-#include <algorithm>
-#include <fstream>
-#include <chrono>
 
 #include "bloom_filter.hpp"
 #include "common.hpp"
-
-using namespace std::chrono;
 
 #define bf_set_size 1000000
 #define bf_fp_prob  1e-09
