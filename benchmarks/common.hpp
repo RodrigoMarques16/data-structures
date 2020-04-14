@@ -6,11 +6,14 @@
 #include <chrono>
 #include <iostream>
 #include <functional>
+#include <cassert>
 
 std::vector<std::string> read_words(int count = 1000000, const char* path = "words") {
     std::ifstream fs(path);
     std::vector<std::string> words;
     char buf[64];
+
+    assert(fs.is_open());
 
     while(count--) {
         fs.getline(buf, 64);

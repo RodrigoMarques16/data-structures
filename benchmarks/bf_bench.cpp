@@ -9,7 +9,7 @@
 
 int main() {
     auto bf = bloom_filter<std::string>(bf_set_size, bf_fp_prob);
-    auto words = read_words();
+    auto words = read_words(word_count);
 
     std::cout << "Bloom filter"
               << " n = " << bf_set_size 
