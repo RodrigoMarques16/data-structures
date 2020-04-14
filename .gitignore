@@ -1,7 +1,5 @@
 .vscode
-
 build
-!build/Makefile
 
 # Prerequisites
 *.d
