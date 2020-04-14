@@ -149,6 +149,24 @@ template <typename value_type> class STree : private BSTree<value_type> {
   public:
     STree() = default;
 
+    ~STree() {
+        release_subtree(std::move(m_root));
+    }
+
+    // https://youtu.be/JfmTagWcqoE?t=1122
+    void release_subtree(unique_ptr n) {
+        while(n->left && n->right) {
+            auto leaf = std::move(n->left);
+            while(leaf->left && leaf->right)
+                leaf = leaf->left ? std::move(leaf->left) : std::move(leaf->right);
+            if (leaf->left)
+                leaf->left.release();
+            else if(leaf->right)
+                leaf->right.release();
+        }
+        n.release();
+    }
+
     STree(std::initializer_list<value_type> vals) {
         for (auto &val : vals)
             insert(val);

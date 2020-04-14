@@ -166,6 +166,20 @@ class RBTree {
         // m_size = vals.size();
     }
 
+     // https://youtu.be/JfmTagWcqoE?t=1122
+    void release_subtree(unique_ptr n) {
+        while(n->left && n->right) {
+            auto leaf = std::move(n->left);
+            while(leaf->left && leaf->right)
+                leaf = leaf->left ? std::move(leaf->left) : std::move(leaf->right);
+            if (leaf->left)
+                leaf->left.release();
+            else if(leaf->right)
+                leaf->right.release();
+        }
+        n.release();
+    }
+
     bool operator==(const RBTree& other) const {
         return is_equal(m_root, other.m_root);
     }

@@ -12,7 +12,7 @@ using namespace std::chrono;
 
 int main() {
     auto st = STree<std::string>();
-    auto words = read_words(1000000,"./benchmarks/words");
+    auto words = read_words(word_count);
 
     std::cout << "Splay Tree"
               << " @ " << word_count << " words\n";
