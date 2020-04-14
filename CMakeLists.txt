@@ -17,14 +17,6 @@ add_library(data-structures INTERFACE)
 target_include_directories(data-structures INTERFACE include)
 
 #######################################
-## EXAMPLES ###########################
-#######################################
-
-add_executable(example main.cpp)
-target_include_directories(example PRIVATE include)
-target_link_libraries(example data-structures)
-
-#######################################
 ## TESTS ##############################
 #######################################
 
@@ -46,9 +38,9 @@ add_executable(st_bench benchmarks/st_bench.cpp)
 target_include_directories(st_bench INTERFACE include)
 target_link_libraries(st_bench INTERFACE data-structures)
 
-add_executable(rb_bench benchmarks/rb_bench.cpp)
-target_include_directories(rb_bench INTERFACE include)
-target_link_libraries(rb_bench INTERFACE data-structures)
+add_executable(rbt_bench benchmarks/rbt_bench.cpp)
+target_include_directories(rbt_bench INTERFACE include)
+target_link_libraries(rbt_bench INTERFACE data-structures)
 
 add_executable(bf_bench benchmarks/bf_bench.cpp)
 target_include_directories(bf_bench INTERFACE include)
