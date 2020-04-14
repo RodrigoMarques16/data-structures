@@ -42,6 +42,6 @@ add_test(mytests tests)
 #######################################
 ## BENCHMARKS #########################
 #######################################
-add_executable(benchmarks benchmarks/bf_bench.cpp)
+add_executable(benchmarks benchmarks/st_bench.cpp)
 target_include_directories(benchmarks INTERFACE include)
 target_link_libraries(tests INTERFACE data-structures)

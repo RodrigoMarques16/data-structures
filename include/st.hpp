@@ -19,9 +19,8 @@ template <typename value_type> class STree : private BSTree<value_type> {
         explicit Node(const value_type &v) : val(v) {}
     };
 
-    static const unique_ptr NIL;
     unique_ptr m_root;
-    size_t m_size;
+    size_t m_size = 0;
 
     unique_ptr &owner(raw_ptr node) {
         auto parent = node->parent;
@@ -107,13 +106,6 @@ template <typename value_type> class STree : private BSTree<value_type> {
         else
             return a.get() == b.get() && is_same(a->left, b->left) &&
                    is_same(b->right, a->right);
-    }
-
-    raw_ptr find_maximum(const unique_ptr &ref) {
-        raw_ptr node = ref.get();
-        while (node->right != nullptr)
-            node = node->right.get();
-        return node;
     }
 
     void rebalance(raw_ptr node) {
