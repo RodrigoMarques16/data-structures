@@ -32,7 +32,7 @@ target_link_libraries(example data-structures)
 add_library(catch INTERFACE)
 target_include_directories(catch INTERFACE lib)
 
-add_executable(tests tests/tests_main.cpp tests/bst_tests.cpp tests/rbt_tests.cpp)
+add_executable(tests tests/tests_main.cpp tests/bst_tests.cpp tests/rbt_tests.cpp tests/bf_tests.cpp)
 target_include_directories(tests INTERFACE include)
 target_link_libraries(tests INTERFACE catch)
 target_link_libraries(tests INTERFACE data-structures)

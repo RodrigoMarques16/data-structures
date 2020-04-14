@@ -27,8 +27,9 @@ struct bloom_filter {
     bloom_filter(size_t n, double p) {
         using namespace std;
 
+        // https://hur.st/bloomfilter/
         int m = ceil(n * log(p) / log(1 / pow(2, log(2))));
-        int k = round((m / n) * log(2));
+        int k = ceil((m / n) * log(2));
 
         bit_count = m;
         hash_func_count = k;
