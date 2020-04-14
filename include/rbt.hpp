@@ -157,15 +157,6 @@ class RBTree {
         return node;
     }
 
-  public:
-    RBTree() = default;
-
-    RBTree(std::initializer_list<value_type> vals) {
-        for (auto& val : vals)
-            insert(val);
-        // m_size = vals.size();
-    }
-
     // https://youtu.be/JfmTagWcqoE?t=1122
     void release_subtree(unique_ptr n) {
         while (n->left) {
@@ -176,6 +167,24 @@ class RBTree {
             leaf->left = std::move(leaf->right);
         }
         n.release();
+    }
+
+
+  public:
+    RBTree() = default;
+
+    RBTree(std::initializer_list<value_type> vals) {
+        for (auto& val : vals)
+            insert(val);
+        // m_size = vals.size();
+    }
+
+    bool contains(const value_type& val) const {
+        raw_ptr node = m_root.get();
+        while (node != nullptr && val != node->val)
+            if (val < node->val) node = node->left.get();
+            else                 node = node->right.get();
+        return node != nullptr;
     }
 
     bool operator==(const RBTree& other) const {
