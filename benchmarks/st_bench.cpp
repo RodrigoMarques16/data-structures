@@ -7,7 +7,7 @@
 
 int main() {
     auto st = STree<std::string>();
-    auto words = read_words(word_count);
+    auto words = read_words(word_count, "words");
     std::cout << words.size() << '\n';
     std::cout << "Splay Tree"
               << " @ " << word_count << " words\n";
@@ -17,12 +17,13 @@ int main() {
             st.insert(words[i]);
     });
 
-    auto search_words = read_words(word_count, "./benchmarks/shuffled_words");
+    auto search_words = read_words(word_count, "shuffled_words");
 
+    int count = 0;
     benchmark("Search ", [&](){
         for(int i = 0; i< word_count; i++)
-            st.insert(search_words[i]);
+            count += st.contains(search_words[i]);
     });
-
-    return 0;
+    
+    return count;
 }
