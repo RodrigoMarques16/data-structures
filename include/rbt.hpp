@@ -120,16 +120,6 @@ class RBTree {
             x->parent->right = std::move(x);
     }
 
-    bool is_equal(const unique_ptr& a, const unique_ptr& b) const {
-        if (a == nullptr && b == nullptr)
-            return true;
-        else if (a == nullptr || b == nullptr)
-            return false;
-        else return a->val == b->val
-                 && is_equal(a->left, b->left) 
-                 && is_equal(b->right, a->right);
-    }
-
     void insert_fixup(raw_ptr node) {
         raw_ptr p = parent(node);
         // if (!p || (p->color == rb_color::BLACK)
