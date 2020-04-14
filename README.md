@@ -6,16 +6,16 @@ From the project root:
 
 `> cmake --build build --config Release --target all`
 
-or
+or if you don't have cmake:
 
-`> cd build`
+`> cd build` \
 `> make`
 
 ## Running
 
-Run `./build/[target}`
+Run `./build/[target]`
 
-Available targets are: rb_bench, st_bench, bf_bench
+Available targets are: rb_bench, st_bench, bf_bench, tests
 
 ## References
 
