@@ -10,7 +10,7 @@ template <typename value_type> class STree : private BSTree<value_type> {
 
     using raw_ptr = Node *;
     using unique_ptr = std::unique_ptr<Node>;
-
+    
     struct Node {
         value_type val;
         raw_ptr parent = nullptr;
@@ -155,14 +155,12 @@ template <typename value_type> class STree : private BSTree<value_type> {
 
     // https://youtu.be/JfmTagWcqoE?t=1122
     void release_subtree(unique_ptr n) {
-        while(n->left && n->right) {
+        while (n->left) {
             auto leaf = std::move(n->left);
-            while(leaf->left && leaf->right)
-                leaf = leaf->left ? std::move(leaf->left) : std::move(leaf->right);
-            if (leaf->left)
-                leaf->left.release();
-            else if(leaf->right)
-                leaf->right.release();
+            while(leaf->left)
+                leaf = std::move(leaf->left);
+            leaf->left.release();
+            leaf->left = std::move(leaf->right);
         }
         n.release();
     }
