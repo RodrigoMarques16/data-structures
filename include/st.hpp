@@ -209,7 +209,7 @@ template <typename value_type> class STree : private BSTree<value_type> {
 
     bool contains(const value_type &val) {
         raw_ptr node = m_root.get();
-        raw_ptr parent;
+        raw_ptr parent = nullptr;
         while (node != nullptr && val != node->val) {
             parent = node;
             if (val < node->val)
