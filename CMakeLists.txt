@@ -38,3 +38,10 @@ target_link_libraries(tests INTERFACE catch)
 target_link_libraries(tests INTERFACE data-structures)
 
 add_test(mytests tests)
+
+#######################################
+## BENCHMARKS #########################
+#######################################
+add_executable(benchmarks benchmarks/bf_bench.cpp)
+target_include_directories(benchmarks INTERFACE include)
+target_link_libraries(tests INTERFACE data-structures)
