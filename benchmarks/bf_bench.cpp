@@ -1,9 +1,10 @@
-#include "bloom_filter.hpp"
-
 #include <iostream>
 #include <algorithm>
 #include <fstream>
 #include <chrono>
+
+#include "bloom_filter.hpp"
+#include "common.hpp"
 
 using namespace std::chrono;
 
@@ -13,14 +14,7 @@ using namespace std::chrono;
 
 int main() {
     auto bf = bloom_filter<std::string>(bf_set_size, bf_fp_prob);
-    std::ifstream fs("words"); 
-    std::vector<std::string> words;
-
-    for(int i = 0; i < word_count; ++i){
-        char buf[32];
-        fs.getline(buf, 32);
-        words.emplace_back(buf);
-    }
+    auto words = read_words();
 
     std::cout << "Bloom filter"
               << " n = " << bf_set_size 
@@ -29,30 +23,16 @@ int main() {
               << " m = " << bf.get_bit_count()
               << " @ " << word_count << " words\n";
 
-    auto t1 = high_resolution_clock::now();
-    
-    for(int i = 0; i < word_count; ++i)
-        bf.add(words[i]);
-    
-    auto t2 = high_resolution_clock::now();
+    benchmark("Insertion", [&](){
+        for(int i = 0; i < word_count; ++i)
+            bf.add(words[i]);
+    });
 
-    std::cout << "Insertion: " 
-          << duration_cast<microseconds>(t2 - t1).count() << "μs, "
-          << duration_cast<milliseconds>(t2 - t1).count() << "ms, "
-          << duration_cast<seconds>(t2 - t1).count()      << "s\n";
-
-    t1 = high_resolution_clock::now();
-
-    bool b = true;
-    for(int i = 0; i < word_count; ++i)
-        b = b && bf.test(words[i]);
-
-    t2 = high_resolution_clock::now();
-
-    std::cout << "Testing: " 
-              << duration_cast<microseconds>(t2 - t1).count() << "μs, "
-              << duration_cast<milliseconds>(t2 - t1).count() << "ms, "
-              << duration_cast<seconds>(t2 - t1).count()      << "s\n";
+    benchmark("Testing", [&](){
+        bool b = true;
+        for(int i = 0; i < word_count; ++i)
+            b = b && bf.test(words[i]);
+    });
 
     return 0;
 }
