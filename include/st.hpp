@@ -1,4 +1,5 @@
 #include "bst.hpp"
+#include "common.hpp"
 #include <iomanip>
 #include <iostream>
 #include <memory>
@@ -22,20 +23,6 @@ template <typename value_type> class STree : private BSTree<value_type> {
     unique_ptr m_root;
     size_t m_size;
 
-    raw_ptr find(const value_type &val) {
-        auto node = m_root.get();
-        raw_ptr parent;
-        while (node != nullptr && val != node->val){
-            parent = node;
-            if (val < node->val)
-                node = node->left.get();
-            else
-                node = node->right.get();
-        }
-        rebalance(node ? node : parent);
-        return node;
-    }
-
     unique_ptr &owner(raw_ptr node) {
         auto parent = node->parent;
         if (parent == nullptr)
@@ -44,32 +31,6 @@ template <typename value_type> class STree : private BSTree<value_type> {
             return parent->left;
         else
             return parent->right;
-    }
-
-    raw_ptr parent(const raw_ptr node) { return node ? node->parent : nullptr; }
-
-    raw_ptr grandparent(const raw_ptr node) { return parent(parent(node)); }
-
-    raw_ptr sibling(const raw_ptr node) {
-        raw_ptr p = parent(node);
-        if (p == nullptr)
-            return nullptr;
-        if (node == p->left.get())
-            return p->right.get();
-        else
-            return p->left.get();
-    }
-
-    raw_ptr uncle(const raw_ptr node) { return sibling(parent(node)); }
-
-    bool is_left_child(raw_ptr node) {
-        return node->parent && node->parent->left &&
-               node == node->parent->left.get();
-    }
-
-    bool is_right_child(raw_ptr node) {
-        return node->parent && node->parent->right &&
-               node == node->parent->right.get();
     }
 
     void left_rotate(unique_ptr &x) {
@@ -147,66 +108,36 @@ template <typename value_type> class STree : private BSTree<value_type> {
             return a.get() == b.get() && is_same(a->left, b->left) &&
                    is_same(b->right, a->right);
     }
-    // if (p->color == rb_color::BLACK)
-    //     return;
 
-    //     if (y && y->color == rb_color::RED) {
-    //       parent(node)->color = rb_color::BLACK;
-    //       uncle(node)->color = rb_color::BLACK;
-    //       grandparent(node)->color = rb_color::RED;
-    //       rebalance(grandparent(node));
-    //     } else if (p && p->color == rb_color::RED /* and y is black*/) {
-    //       if (is_right_child(node) && is_left_child(p)) {
-    //         left_rotate(owner(p));
-    //         node = node->left.get();
-    //       } else if (is_left_child(node) && is_right_child(p)) {
-    //         right_rotate(owner(p));
-    //         node = node->right.get();
-    //       }
-    //       raw_ptr g = grandparent(node);
-    //       if (node == p->left.get())
-    //         right_rotate(owner(g));
-    //       else
-    //         left_rotate(owner(g));
-    //       p->color = rb_color::BLACK;
-    //       g->color = rb_color::RED;
-    //     }left
+    raw_ptr find_maximum(const unique_ptr &ref) {
+        raw_ptr node = ref.get();
+        while (node->right != nullptr)
+            node = node->right.get();
+        return node;
+    }
 
     void rebalance(raw_ptr node) {
         raw_ptr p = parent(node);
         raw_ptr gp = grandparent(node);
 
         while (gp != nullptr) {
-            print();
             if (is_left_child(node) == is_left_child(p)) {
+                // zig-zig
                 if (is_left_child(p)) {
                     right_rotate(owner(gp));
-                    std::cout << "right rotate - ";
+                    right_rotate(owner(p));
                 } else {
                     left_rotate(owner(gp));
-                    std::cout << "left rotate - ";
-                }
-                if (is_left_child(node)) {
-                    right_rotate(owner(p));
-                    std::cout << "right rotate" << std::endl;
-                } else {
                     left_rotate(owner(p));
-                    std::cout << "left rotate" << std::endl;
                 }
             } else {
+                // zig-zag
                 if (is_left_child(node)) {
                     right_rotate(owner(p));
-                    std::cout << "right rotate - ";
+                    left_rotate(owner(gp));
                 } else {
                     left_rotate(owner(p));
-                    std::cout << "left rotate - ";
-                }
-                if (is_left_child(node)) {
                     right_rotate(owner(gp));
-                    std::cout << "right rotate" << std::endl;
-                } else {
-                    left_rotate(owner(gp));
-                    std::cout << "left rotate" << std::endl;
                 }
             }
             p = parent(node);
@@ -214,13 +145,11 @@ template <typename value_type> class STree : private BSTree<value_type> {
         }
 
         if (p != nullptr) {
-            print();
+            // zig
             if (is_left_child(node)) {
                 right_rotate(owner(p));
-                std::cout << "right rotate" << std::endl;
             } else {
                 left_rotate(owner(p));
-                std::cout << "left rotate" << std::endl;
             }
         }
     }
@@ -266,31 +195,24 @@ template <typename value_type> class STree : private BSTree<value_type> {
         }
 
         ++m_size;
-        print();
     }
 
-    void remove(const value_type& val) {
-        raw_ptr node = find(val);
-        if (node == nullptr)
-            return;
-        if (node->left == nullptr) {
-            auto& o = owner(node);
-            o = std::move(node->right);
-        } else if (node->right == nullptr) {
-            auto& o = owner(node);
-            o = std::move(node->left);
-        } else {
-            raw_ptr succ = find_maximum(node->left);
-            node->val = succ->val;
-            // succ guaranteed not to be null and to have only a right child
-            owner(succ).reset(succ->right.release());
+    bool contains(const value_type &val) {
+        raw_ptr node = m_root.get();
+        raw_ptr parent;
+        while (node != nullptr && val != node->val) {
+            parent = node;
+            if (val < node->val)
+                node = node->left.get();
+            else
+                node = node->right.get();
         }
-        --m_size;
-    }
-
-    bool contains(const value_type& val) {
-        raw_ptr node = find(val);
-        return node != nullptr;
+        if (node == nullptr) {
+            rebalance(parent);
+            return false;
+        }
+        rebalance(node);
+        return true;
     }
 
     friend std::ostream &operator<<(std::ostream &os, unique_ptr &node) {
