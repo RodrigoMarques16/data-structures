@@ -44,3 +44,14 @@ bool is_right_child(N* node) {
         && node->parent->right
         && node == node->parent->right.get();
 }
+
+template<typename N>
+bool is_equal(const N& a, const N& b) {
+    if (a == nullptr && b == nullptr)
+        return true;
+    else if (a == nullptr || b == nullptr)
+        return false;
+    else return a->val == b->val
+             && is_equal(a->left, b->left) 
+             && is_equal(b->right, a->right);
+}

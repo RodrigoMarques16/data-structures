@@ -3,34 +3,69 @@
 #include <memory>
 #include <bitset>
 #include <functional>
+#include <array>
+#include <cmath>
 
-template<
-    typename value_type, 
-    typename hash_func,
-    int bit_count = 50,
-    int hash_func_count = 1>
+#include <hash/fnv.h>
+#include <hash/xxhash.hpp>
+
+template <typename value_type> 
+struct Hasher {
+    std::pair<uint32_t, uint32_t> operator()(value_type k) const {
+        auto a = FNV::fnv1a(k);
+        auto b = xxh::xxhash<32>(k);
+        return {a, b};
+    }
+};
+
+template <typename value_type, 
+          typename hash_func = Hasher<value_type>>
 struct bloom_filter {
 
-    // using hash_func = std::function<size_t(value_type)>;
+    using container = std::vector<bool>;
 
-    std::bitset<bit_count> B;
-    std::array<hash_func, hash_func_count> hash_funcs = { std::hash<value_type>{} };
+    bloom_filter(size_t n, double p) {
+        using namespace std;
 
-    bloom_filter(std::initializer_list<value_type> vals) {
-        for (auto& val : vals)
+        int m = ceil(n * log(p) / log(1 / pow(2, log(2))));
+        int k = round((m / n) * log(2));
+
+        bit_count = m;
+        hash_func_count = k;
+        B.resize(m);
+    }
+
+    void add(const value_type& val) {
+        auto [a, b] = hash_values(val);
+        for (size_t i = 0; i < hash_func_count; ++i)
+            B[nthHash(i, a, b)] = true;
+    }
+
+    void add(const std::initializer_list<value_type>& vals) {
+        for (auto val : vals)
             add(val);
     }
 
-    void add(value_type val) {
-        for(auto& h : hash_funcs)
-            B.set(h(val));
-    }
-
-    bool test(value_type val) {
-        for (auto& h : hash_funcs)
-            if (B[h(val)] == 0) 
+    bool test(const value_type& val) const {
+        auto [a, b] = hash_values(val);
+        for (size_t i = 0; i < hash_func_count; ++i)
+            if (B[nthHash(i, a, b)] == false)
                 return false;
         return true;
     }
 
+    size_t get_bit_count() { return bit_count; }
+
+    size_t get_hash_func_count() { return hash_func_count; }
+
+  private:
+    size_t bit_count;
+    size_t hash_func_count;
+    container B;
+
+    const hash_func hash_values = hash_func{};
+
+    size_t nthHash(int n, size_t a, size_t b) const {
+        return (a + n * b) % bit_count;
+    }
 };

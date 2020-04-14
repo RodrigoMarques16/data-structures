@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(data-structures VERSION 0.1.0)
+project(data-structures VERSION 0.1.0 LANGUAGES C CXX)
 
 add_compile_options(-std=c++17 -Wall -Wextra -Wpedantic)
 

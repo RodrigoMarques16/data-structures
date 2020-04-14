@@ -1,13 +1,16 @@
 #include "include/bst.hpp"
 #include "include/rbt.hpp"
 #include "include/st.hpp"
+#include "bloom_filter.hpp"
+
 #include <iostream>
 #include <algorithm>
 
 int main(/*int argc, char** argv*/) {
-    // RBTree<int> t = {11, 2, 1, 7, 5, 4, 8, 14, 15};
-    STree<int> t = {11, 2, 1, 7, 5, 4, 8, 14, 15};
-    // std::cout << t <<'\n';
-    t.print();
+    auto bf = bloom_filter<std::string>(100, 0.001);
+    bf.add({"hello", "cruel", "world"});
+    std::cout << "hello " << bf.test("hello") << '\n';
+    std::cout << "cruel " << bf.test("cruel") << '\n';
+    std::cout << "world " << bf.test("world") << '\n';
     return 0;
 }
